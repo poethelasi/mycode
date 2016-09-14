@@ -1,3 +1,2 @@
 # mycode
-<ul>haha</ul>
-<li>第一条</li>
+<div>主要记录一些常用的代码</div>
