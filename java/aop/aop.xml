@@ -1,0 +1,11 @@
+<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+<aspectj>
+	<weaver>
+		<include within="com.mchange.v2.resourcepool.*" />
+		<include within="com.zzbest.platform.aspect.monitor.*" />
+	</weaver>
+	<aspects>
+		<!-- weave in just this aspect -->
+		<aspect name="com.zzbest.platform.aspect.monitor.C3P0MonitorAspect" />
+	</aspects>
+</aspectj>
