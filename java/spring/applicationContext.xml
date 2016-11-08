@@ -3,24 +3,26 @@
 <beans default-destroy-method="destroy" default-init-method="afterPropertiesSet"
 	xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
 	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 
 	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd 
 	    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
 	    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd 
-	   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+	  
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-	<mvc:annotation-driven />
-
 	<!-- 自动扫描标注式Bean -->
-	<context:component-scan base-package="com.zzbest.ematerial" />
+	<context:component-scan base-package="com.zzbest.platform" />
+	<context:component-scan base-package="com.zzbest.online" />
+	<context:component-scan base-package="com.zzbest.hr" />
+	<context:component-scan base-package="com.zzbest.ct" />
 
 	<!-- 数据库连接配置参数文件, Email配置参数文件 -->
-	<context:property-placeholder location="classpath:config/db.properties" />
+	<context:property-placeholder
+		location="classpath:conf/db.properties,classpath:conf/mail.properties" />
 
 	<!-- 配置数据源 -->
-	<bean id="dataSource " class="com.mchange.v2.c3p0.ComboPooledDataSource"
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
 		destroy-method="close">
 		<property name="user" value="${jdbc.user}"></property>
 		<property name="password" value="${jdbc.password}"></property>
@@ -30,8 +32,10 @@
 		<property name="maxPoolSize" value="${jdbc.maxPoolSize}"></property>
 		<property name="minPoolSize" value="${jdbc.minPoolSize}"></property>
 		<property name="idleConnectionTestPeriod" value="${jdbc.idleConnectionTestPeriod}"></property>
-		<property name="testConnectionOnCheckin" value="false" />
-		<property name="testConnectionOnCheckout" value="true" />
+		<property name="checkoutTimeout" value="${jdbc.checkoutTimeout}" />
+		<property name="testConnectionOnCheckin" value="true" />
+		<property name="testConnectionOnCheckout" value="false" />
+		<property name="maxIdleTime" value="1800" />
 	</bean>
 
 	<!-- Hibernate 配置 -->
@@ -48,11 +52,15 @@
 				<prop key="hibernate.connection.autocommit">false</prop>
 				<prop key="hibernate.show_sql">false</prop>
 				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.generate_statistics">false</prop>
 			</props>
 		</property>
 		<property name="packagesToScan">
 			<list>
-				<value>com.zzbest.ematerial</value>
+				<value>com.zzbest.platform</value>
+				<value>com.zzbest.online</value>
+				<value>com.zzbest.hr</value>
+				<value>com.zzbest.ct</value>
 			</list>
 		</property>
 		<!-- 使用JPA进行配置，尽量避免一对多、多对多等的级联保存 -->
@@ -67,29 +75,83 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 
+	<!-- activiti 配置 -->
+	<bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">
+		<property name="dataSource" ref="dataSource" />
+		<property name="transactionManager" ref="transactionManager" />
+		<property name="databaseSchemaUpdate" value="true" />
+		<property name="jobExecutorActivate" value="false" />
+
+		<!-- 流程图字体 -->
+		<property name="activityFontName" value="宋体" />
+		<property name="labelFontName" value="宋体" />
+
+		<!-- Email Configuration -->
+		<property name="mailServerHost" value="${mailServerHost}"></property>
+		<property name="mailServerPort" value="${mailServerPort}"></property>
+		<property name="mailServerUsername" value="${mailServerUsername}"></property>
+		<property name="mailServerPassword" value="${mailServerPassword}"></property>
+	</bean>
+
+	<!-- activiti流程引擎 -->
+	<bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean">
+		<property name="processEngineConfiguration" ref="processEngineConfiguration" />
+	</bean>
+
+	<!-- activiti各种服务组件 -->
+	<bean id="repositoryService" factory-bean="processEngine"
+		factory-method="getRepositoryService" />
+	<bean id="runtimeService" factory-bean="processEngine"
+		factory-method="getRuntimeService" />
+	<bean id="taskService" factory-bean="processEngine"
+		factory-method="getTaskService" />
+	<bean id="historyService" factory-bean="processEngine"
+		factory-method="getHistoryService" />
+	<bean id="managementService" factory-bean="processEngine"
+		factory-method="getManagementService" />
+	<bean id="formService" factory-bean="processEngine"
+		factory-method="getFormService" />
+	<bean id="identityService" factory-bean="processEngine"
+		factory-method="getIdentityService" />
+
 	<!--配置事物的注解 -->
 	<tx:annotation-driven transaction-manager="transactionManager" />
 
-	<!-- freemaker 模板引擎配置 -->
-	<bean id="freemarkerConfig"
-		class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
-		<property name="templateLoaderPath" value="/mainPage/">
+	<!-- Quartz 任务调度配置 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="configLocation" value="classpath:conf/quartz.properties" />
+		<property name="dataSource" ref="dataSource" />
+		<property name="startupDelay" value="30" />
+		<property name="triggers">
+			<list>
+				<ref bean="sendAlertEmailsForTaskCronTrigger" />
+			</list>
 		</property>
 	</bean>
 
-	<bean id="viewResolver"
-		class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
-		<property name="cache" value="true" />
-		<property name="prefix" value="" />
-		<property name="suffix" value=".ftl" />
+	<bean name="sendAlertEmailsForTaskCronTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="sendAlertEmailsForTaskJobDetail" />
+		<property name="cronExpression" value="0 0/40 * * * ?" />
 	</bean>
 
-	<!-- <bean
-		class="org.springframework.web.servlet.view.InternalResourceViewResolver"
-		id="internalResourceViewResolver">
-		<property name="prefix" value="/WEB-INF/jsp/" />
-		<property name="suffix" value=".jsp" />
+	<bean name="sendAlertEmailsForTaskJobDetail"
+		class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass"
+			value="com.zzbest.platform.job.MailAlertForPendingTask" />
 	</bean>
-	<mvc:resources mapping="/resources/**" location="/min-js/" /> -->
 
+	<!-- C3P0数据库连接池测试 -->
+	<bean id="c3p0LogAspect" class="com.zzbest.platform.aspect.monitor.C3P0LogAspect" />
+	<aop:config>
+		<aop:pointcut expression="execution(*  com.mchange.v2.c3p0..*.*(..))"
+			id="c3p0Pointcut" />
+		<aop:aspect id="c3p0Aspect" ref="c3p0LogAspect">
+			<aop:before method="before" pointcut-ref="c3p0Pointcut" />
+			<aop:after method="after" pointcut-ref="c3p0Pointcut" />
+		</aop:aspect>
+	</aop:config>
+
+	<context:load-time-weaver aspectj-weaving="autodetect" />
+	
 </beans>
