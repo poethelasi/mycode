@@ -1,0 +1,51 @@
+<configuration scan="true" scanPeriod="60 seconds" debug="true">
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>../logs/zzbest-logback.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>zzbest-logback.%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+			<totalSizeCap>2GB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyyMMdd HH:mm:ss.SSS} [%thread] %-5level %logger.%M -
+				%msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="c3p0MonitorLog"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>../logs/c3p0.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>c3p0.%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+			<totalSizeCap>2GB</totalSizeCap>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyyMMdd HH:mm:ss.SSS} [%thread] %-5level %logger.%M -
+				%msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyyMMdd HH:mm:ss.SSS} [%thread] %-5level %logger.%M -
+				%msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<root level="info"><!-- debug warn error info -->
+		<appender-ref ref="FILE" />
+		<appender-ref ref="STDOUT" />
+	</root>
+
+	<logger name="com.mchange.v2.resourcepool.C3P0MonitorAspect" level="info"
+		additivity="false">
+		<appender-ref ref="c3p0MonitorLog" />
+	</logger>
+</configuration>
