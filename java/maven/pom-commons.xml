@@ -21,3 +21,15 @@
     <artifactId>objenesis</artifactId>
     <version>2.4</version>
 </dependency>
+
+<dependency>
+    <groupId>org.aspectj</groupId>
+    <artifactId>aspectjtools</artifactId>
+    <version>1.8.9</version>
+</dependency>
+
+<dependency>
+    <groupId>org.javassist</groupId>
+    <artifactId>javassist</artifactId>
+    <version>3.21.0-GA</version>
+</dependency>
