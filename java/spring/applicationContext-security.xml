@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    					http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    					http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                        http://www.springframework.org/schema/security 
+                        http://www.springframework.org/schema/security/spring-security.xsd"
+	default-autowire="byName">
+
+	<context:annotation-config />
+	<context:component-scan base-package="com.zzbest" />
+
+	<http use-expressions="true" entry-point-ref="authenticationProcessingFilterEntryPoint">
+	    <intercept-url pattern="/*" filters="none" />
+		<intercept-url pattern="/loginview*" filters="none" />
+		<intercept-url pattern="/com.zzbest.dashboard.ui.view.privilege.loginview**"
+			filters="none" />
+		<intercept-url pattern="/VAADIN/**" filters="none" />
+		<intercept-url pattern="/VAADIN/themes/tests-valo/img/**"
+			filters="none" />
+		<logout invalidate-session="true" logout-success-url="/login.jsp"
+			logout-url="/j_spring_security_logout" />
+		<!-- 实现免登陆验证 -->
+		<remember-me />
+		<session-management invalid-session-url="/timeout.jsp">
+			<concurrency-control max-sessions="10"
+				error-if-maximum-exceeded="true" />
+		</session-management>
+
+		<custom-filter ref="loginFilter" position="FORM_LOGIN_FILTER" />
+		<custom-filter ref="securityFilter" before="FILTER_SECURITY_INTERCEPTOR" />
+	</http>
+
+	<!-- 未登录处理 -->
+	<beans:bean id="authenticationProcessingFilterEntryPoint"
+		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<beans:property name="loginFormUrl" value="/login.jsp" />
+	</beans:bean>
+
+	<!-- 登录验证器 -->
+	<beans:bean id="loginFilter"
+		class="com.zzbest.platform.security.MyUsernamePasswordAuthenticationFilter">
+		<!-- 处理登录 -->
+		<beans:property name="filterProcessesUrl" value="/UIDL/?v-uiId=0" />
+		<beans:property name="authenticationSuccessHandler"
+			ref="loginLogAuthenticationSuccessHandler" />
+		<beans:property name="authenticationFailureHandler"
+			ref="simpleUrlAuthenticationFailureHandler" />
+		<beans:property name="authenticationManager" ref="myAuthenticationManager" />
+	</beans:bean>
+
+	<beans:bean id="loginLogAuthenticationSuccessHandler"
+		class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+		<beans:property name="defaultTargetUrl" value="/loginSuccess.action" />
+	</beans:bean>
+
+	<beans:bean id="simpleUrlAuthenticationFailureHandler"
+		class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+		<beans:property name="defaultFailureUrl" value="/login.jsp" />
+	</beans:bean>
+
+	<!-- 认证过滤器 -->
+	<beans:bean id="securityFilter"
+		class="com.zzbest.platform.security.MySecurityInterceptorFilter">
+		<!-- 用户拥有的权限 -->
+		<beans:property name="authenticationManager" ref="myAuthenticationManager" />
+		<!-- 用户是否拥有所请求资源的权限 -->
+		<beans:property name="accessDecisionManager" ref="myAccessDecisionManager" />
+		<!-- 资源与权限对应关系 -->
+		<beans:property name="securityMetadataSource" ref="mySecurityMetadataSource" />
+	</beans:bean>
+
+	<authentication-manager alias="myAuthenticationManager">
+		<authentication-provider ref="authenticationProvider" />
+	</authentication-manager>
+
+	<beans:bean id="authenticationProvider"
+		class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+		<beans:property name="userDetailsService" ref="myUserDetailServiceImpl" />
+		<beans:property name="hideUserNotFoundExceptions"
+			value="false" />
+		<beans:property name="passwordEncoder" ref="md5PasswordEncoder" />
+	</beans:bean>
+
+	<beans:bean id="myUserDetailServiceImpl"
+		class="com.zzbest.platform.security.MyUserDetailsServiceImpl" />
+
+	<beans:bean id="md5PasswordEncoder"
+		class="org.springframework.security.authentication.encoding.Md5PasswordEncoder">
+		<!-- false 表示：生成32位的Hex版, 这也是encodeHashAsBase64的, Acegi 默认配置; true 表示：生成24位的Base64版 -->
+		<beans:property name="encodeHashAsBase64" value="false" />
+	</beans:bean>
+
+	<beans:bean id="myAccessDecisionManager"
+		class="com.zzbest.platform.security.MyAccessDecisionManager" />
+
+	<beans:bean id="mySecurityMetadataSource"
+		class="com.zzbest.platform.security.MySecurityMetadataSource" />
+
+</beans:beans>
