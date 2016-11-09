@@ -13,9 +13,9 @@ import java.text.MessageFormat;
 
 public class ImportData {
 
-	private final static String url = "jdbc:mysql://192.168.1.15:3306/ematerialdb?useUnicode=true&characterEncoding=UTF-8";
-	private final static String username = "test";
-	private final static String password = "test";
+	private final static String url = "jdbc:mysql://192.168.1.14:3306/ematerialdb?useUnicode=true&characterEncoding=UTF-8";
+	private final static String username = "activiti";
+	private final static String password = "activiti";
 
 	private static Connection conn = null;
 
@@ -105,6 +105,21 @@ public class ImportData {
 	 *        SUM((CASE WHEN t.type='checkOut' THEN 1 ELSE 0 END)) checkOutCount
 	 *       FROM c3p0anlysis t GROUP BY t.`connectionObj`) 
 	 *  m WHERE m.checkOutCount > m.checkInCount;
+	 * </pre>
+	 */
+	/**
+	 * <pre>
+	 * SELECT p.`caller` 
+	 *     FROM c3p0Anlysis p 
+	 *     JOIN (SELECT t.`connectionObj`,MAX(t.logTime) lastCheckOutTime 
+	 * 	FROM c3p0Anlysis t WHERE t.`type`='checkOut'
+	 * 		AND t.`connectionObj` IN (SELECT m.`connectionObj` FROM (
+	 * 		     SELECT t.`connectionObj`,
+	 * 		       SUM((CASE WHEN t.type='checkIn' THEN 1 ELSE 0 END)) checkInCount,
+	 * 		       SUM((CASE WHEN t.type='checkOut' THEN 1 ELSE 0 END)) checkOutCount
+	 * 		      FROM c3p0anlysis t GROUP BY t.`connectionObj`) 
+	 * 		 m WHERE m.checkOutCount > m.checkInCount) GROUP BY t.`connectionObj`) q 
+	 *     ON p.`connectionObj` = q.connectionObj AND p.`logTime` = q.lastCheckOutTime;
 	 * </pre>
 	 */
 	public static void closeConnection() {
