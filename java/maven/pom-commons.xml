@@ -33,3 +33,22 @@
     <artifactId>javassist</artifactId>
     <version>3.21.0-GA</version>
 </dependency>
+
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-instrument</artifactId>
+    <version>4.3.3.RELEASE</version>
+</dependency>
+
+<!-- https://mvnrepository.com/artifact/org.springframework/spring-instrument-tomcat -->
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-instrument-tomcat</artifactId>
+    <version>4.3.3.RELEASE</version>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-aspects</artifactId>
+    <version>4.3.3.RELEASE</version>
+</dependency>
