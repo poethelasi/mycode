@@ -1,11 +1,22 @@
 <!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
 <aspectj>
-	<weaver>
-		<include within="com.mchange.v2.resourcepool.*" />
-		<include within="com.zzbest.platform.aspect.monitor.*" />
+	<!-- 打印内部信息 -->
+	<weaver options="-verbose -debug">
+		<!-- 在org.test包（不包括其子包）下的所有类都可以被织入 -->
+		<include within="org.test.*" />
+
+		<!-- 在org.apache包（包括其子包）下的所有类都可以被织入 -->
+		<include within="org.apache..*" />
+
+		<!-- aspect 所在的包也需要加入到weaver中，否则会报错，对应org.mytest.ProfilingAspect所在的包 -->
+		<include within="org.mytest.*" />
+
+		<!-- dump路径，以Eclipse为例：${项目}\_ajdump\org\test\下面 -->
+		<dump within="org.test.*" />
 	</weaver>
+
 	<aspects>
-		<!-- weave in just this aspect -->
-		<aspect name="com.zzbest.platform.aspect.monitor.C3P0MonitorAspect" />
+		<!-- 声明已经存在的Aspect类，可以通过@Aspect标注完成 -->
+		<aspect name="org.mytest.ProfilingAspect" />
 	</aspects>
 </aspectj>
