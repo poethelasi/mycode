@@ -28,3 +28,32 @@
     <version>8.0.36</version>
 </dependency>
 
+<dependency>
+    <groupId>org.apache.tomcat</groupId>
+    <artifactId>tomcat-api</artifactId>
+    <version>8.0.36</version>
+</dependency>
+
+<dependency>
+    <groupId>org.apache.tomcat</groupId>
+    <artifactId>tomcat-annotations-api</artifactId>
+    <version>8.0.36</version>
+</dependency>
+
+<dependency>
+    <groupId>org.apache.tomcat</groupId>
+    <artifactId>tomcat-jni</artifactId>
+    <version>8.0.36</version>
+</dependency>
+
+<dependency>
+    <groupId>org.apache.tomcat</groupId>
+    <artifactId>tomcat-util</artifactId>
+    <version>8.0.36</version>
+</dependency>
+
+<dependency>
+    <groupId>org.apache.tomcat</groupId>
+    <artifactId>tomcat-util-scan</artifactId>
+    <version>8.0.36</version>
+</dependency>
