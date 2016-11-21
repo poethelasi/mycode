@@ -39,7 +39,7 @@ public class VirtualMachineLoadAgent {
 			/**
 			 * <pre>
 			 * 下面这样写是不对的，Agent.getInstrumentation()会报错。
-			 *1)  vm.loadAgent(agentJar)是在目标JVM中加载了agentJar，Agent是用目标JVM加载器进行加载的。
+			 *1) vm.loadAgent(agentJar)是在目标JVM中加载了agentJar，Agent是用目标JVM加载器进行加载的。
 			 *2) 执行下面的代码，是在本地JVM中，该Agent是由本地JVM加载的。
 			 *3) 从本地的JVM中想去获取目标JVM中Agent的Instrumetation实例，肯定会报错。
 			 *4) 只能在目标JVM中执行下面代码。
