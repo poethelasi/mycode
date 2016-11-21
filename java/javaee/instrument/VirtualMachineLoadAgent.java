@@ -28,6 +28,7 @@ public class VirtualMachineLoadAgent {
 			while ((line = reader.readLine()) != null) {
 				if (line.contains(args[0])) {
 					processId = line.split(" ")[0];
+					break;
 				}
 			}
 
