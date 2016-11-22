@@ -566,6 +566,9 @@ public abstract class AbstractEngineerReviewAdviceWordExporter {
 		}
 	}
 
+	/**
+	*更新图片信息，必须这么做
+	*/
 	protected void updateChart(XWPFDocument doc) {
 		List<POIXMLDocumentPart> parts = doc.getRelations();
 
