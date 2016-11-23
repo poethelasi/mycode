@@ -1,5 +1,6 @@
 package com.zzbest.tools.worddata;
 
+import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -15,6 +16,9 @@ import org.apache.poi.xwpf.usermodel.XWPFPictureData;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.Environment;
 import org.openxmlformats.schemas.drawingml.x2006.main.CTGraphicalObject;
 import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.CTInline;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTDrawing;
@@ -25,7 +29,14 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.zzbest.online.consultation.model.Attachment;
+import com.zzbest.online.review.dao.ReviewAdviceDAO;
+import com.zzbest.online.review.dao.Impl.ReviewAdviceDAOImpl;
 import com.zzbest.online.review.model.ReviewAdvice;
+import com.zzbest.platform.privilege.model.Role;
+import com.zzbest.platform.privilege.model.SystemMenu;
+import com.zzbest.platform.privilege.model.User;
 
 public class WordDataImporter {
 
@@ -39,6 +50,8 @@ public class WordDataImporter {
 
 	private String reviewDimension = null;
 
+	private int reviewAdviceCount = 0;
+
 	public void importDataFromDirectory(String directoryPath) {
 		try {
 			Collection<File> files = FileUtils.listFiles(
@@ -49,6 +62,8 @@ public class WordDataImporter {
 				// getWordDocument(file.getCanonicalPath());
 				importDataFromFile(file.getCanonicalPath());
 			}
+
+			System.out.println(">>>>>>>导入评审意见总数：" + getReviewAdviceCount());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -146,6 +161,13 @@ public class WordDataImporter {
 				List<CTGraphicalObject> graphicalObjects = readPictures(sixthRow);
 				setPictureData(ra, graphicalObjects);
 			}
+
+			inc();
+			/*
+			 * try { //System.out.println(ra);
+			 * //getReviewAdviceDAO().createReviewAdvice(ra); } catch
+			 * (PropertyVetoException e) { e.printStackTrace(); }
+			 */
 		}
 	}
 
@@ -416,6 +438,14 @@ public class WordDataImporter {
 		return reviewDimension;
 	}
 
+	private void inc() {
+		reviewAdviceCount++;
+	}
+
+	private int getReviewAdviceCount() {
+		return reviewAdviceCount;
+	}
+
 	private boolean isFiveRowsFormat() {
 		String demonsion = getReviewDimension();
 		// 13封装库设计/12PCB工艺设计/11器件工艺应用/10互连可靠性/9工艺线路设计/8热设计/7电源及信号完整性（PI and
@@ -461,6 +491,38 @@ public class WordDataImporter {
 		}
 
 		this.reviewDimension = dimension;
+	}
+
+	private ReviewAdviceDAOImpl dao = null;
+
+	protected ReviewAdviceDAO getReviewAdviceDAO() throws PropertyVetoException {
+		if (dao == null) {
+			dao = new ReviewAdviceDAOImpl();
+			dao.setCheckWriteOperations(false);
+
+			com.mchange.v2.c3p0.ComboPooledDataSource dataSource = new ComboPooledDataSource();
+			dataSource.setDriverClass("com.mysql.jdbc.Driver");
+			dataSource.setUser("zzbest");
+			dataSource.setPassword("Zz12345");
+			dataSource
+					.setJdbcUrl("jdbc:mysql://120.24.178.182:3306/zzbest_service_pro1?useUnicode=true&characterEncoding=UTF-8");
+
+			Configuration cfg = new Configuration();
+			cfg.addAnnotatedClass(ReviewAdvice.class);
+			cfg.addAnnotatedClass(User.class);
+			cfg.addAnnotatedClass(Attachment.class);
+			cfg.addAnnotatedClass(Role.class);
+			cfg.addAnnotatedClass(SystemMenu.class);
+			cfg.getProperties().put(Environment.DATASOURCE, dataSource);
+			cfg.getProperties().put(Environment.CURRENT_SESSION_CONTEXT_CLASS,
+					"managed");
+			@SuppressWarnings("deprecation")
+			SessionFactory sf = cfg.buildSessionFactory();
+
+			dao.setSessionFactory(sf);
+		}
+
+		return dao;
 	}
 
 	public static final String filePath = "D:\\reviewWord\\1物料的厂家选择.docx";
