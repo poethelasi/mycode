@@ -502,10 +502,10 @@ public class WordDataImporter {
 
 			com.mchange.v2.c3p0.ComboPooledDataSource dataSource = new ComboPooledDataSource();
 			dataSource.setDriverClass("com.mysql.jdbc.Driver");
-			dataSource.setUser("zzbest");
-			dataSource.setPassword("Zz12345");
+			dataSource.setUser("123456");
+			dataSource.setPassword("123456");
 			dataSource
-					.setJdbcUrl("jdbc:mysql://120.24.178.182:3306/zzbest_service_pro1?useUnicode=true&characterEncoding=UTF-8");
+					.setJdbcUrl("jdbc:mysql://10.214.33.182:3306/zzbest_service_pro1?useUnicode=true&characterEncoding=UTF-8");
 
 			Configuration cfg = new Configuration();
 			cfg.addAnnotatedClass(ReviewAdvice.class);
