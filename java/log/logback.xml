@@ -3,7 +3,7 @@
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>../logs/zzbest-logback.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>zzbest-logback.%d{yyyy-MM-dd}.log
+			<fileNamePattern>../logs/zzbest-logback.%d{yyyy-MM-dd}.log
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 			<totalSizeCap>2GB</totalSizeCap>
@@ -19,7 +19,7 @@
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>../logs/c3p0.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>c3p0.%d{yyyy-MM-dd}.log
+			<fileNamePattern>../logs/c3p0.%d{yyyy-MM-dd}.log
 			</fileNamePattern>
 			<maxHistory>30</maxHistory>
 			<totalSizeCap>2GB</totalSizeCap>
